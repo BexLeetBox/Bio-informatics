@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>TF Binding Site Scanner</title>
+        <link rel="stylesheet" type="text/css" href="./static/style.css">
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script src="./static/main.js"></script>
+        
+    </head>
+    <body>
+        <div class="container">
+            <h1>TF Binding Site Scanner</h1>
+    
+            <label for="tf_matrix_id">JASPAR Matrix ID:</label>
+            <input type="text" id="tf_matrix_id" placeholder="Enter JASPAR ID (e.g., MA0004.1)">
+    
+            <label for="dna_sequence">DNA Sequence:</label>
+            <textarea id="dna_sequence" placeholder="Enter DNA Sequence (A, T, C, G)" rows="4"></textarea>
+    
+            <button onclick="scanSequence()">Scan</button>
+    
+            <h3>Highlighted Sequence</h3>
+            <p id="highlighted_sequence"></p>
+    
+            <h3>Binding Site Scores Plot</h3>
+            <div id="plotly-graph"></div>
+    
+            <pre id="scan_output"></pre>
+        </div>
+    </body>
+    </html>

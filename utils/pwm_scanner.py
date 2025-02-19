@@ -61,7 +61,7 @@ def scan_dna_sequence(dna_sequence, pwm):
         return {'binding_sites': [], 'scores': []}
 
     # Dynamically adjust the threshold
-    threshold = np.mean(scores) + 0.1 * np.std(scores)
+    threshold = np.mean(scores) + 2 * np.std(scores)
 
     # Find binding sites
     binding_sites = [i for i, score in enumerate(scores) if score > threshold]

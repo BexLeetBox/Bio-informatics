@@ -148,6 +148,7 @@ def highlight_binding_sites(sequence, binding_sites, pwm):
     """
     highlighted = list(sequence)
     
+    print(f"found binding sites: {binding_sites}")
     if pwm is None or 'A' not in pwm:  # Check if PWM is valid
         print("Error: Invalid PWM data")
         return sequence  # Return unmodified sequence

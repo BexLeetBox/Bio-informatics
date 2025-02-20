@@ -73,7 +73,7 @@ def generate_plotly_json(scores):
     trace = go.Scatter(
         x=list(range(len(scores))),
         y=scores,
-        mode='lines+markers',
+        mode='markers',
         line=dict(
             color='#00ff88',  # Neon green accent
             width=2.5,
@@ -122,7 +122,10 @@ def generate_plotly_json(scores):
         ),
         margin=dict(l=50, r=50, b=50, t=80),
         hovermode='x unified',
-        showlegend=False
+        showlegend=True,  # Enable legend to show trace names
+        updatemenus=[  # Add interactive button
+    
+]
     )
 
     fig = go.Figure(data=[trace], layout=layout)
@@ -133,6 +136,8 @@ def generate_plotly_json(scores):
     )
     
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+
 
 def highlight_binding_sites(sequence, binding_sites, pwm):
     """

@@ -142,3 +142,18 @@ pre {
     margin: auto;
     background-color: #1e1e1e !important;
 }
+
+/* Force the Plotly updatemenus buttons to always have a dark background */
+.updatemenu-item {
+    background-color: #1e1e1e !important;  /* Dark background */
+    color: white !important;
+    border: 1px solid #05d272 !important;
+}
+
+/* Ensure active (selected) buttons also have correct background */
+.updatemenu-item[stroke-width="2"] {
+    background-color: #1e1e1e !important;
+    color: white !important;
+    border: 1px solid #05d272 !important;
+    fill: white !important;
+}

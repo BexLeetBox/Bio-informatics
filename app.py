@@ -6,7 +6,8 @@ import plotly
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
 from utils.pwm_scanner import scan_dna_sequence 
-from utils.jaspar_api import fetch_pwm_from_jaspar  
+from utils.jaspar_api import fetch_pwm_from_jaspar, fetch_pfm_from_jaspar  
+import traceback
 
 app = Flask(__name__)
 
@@ -45,16 +46,21 @@ def scan():
         if pwm is None:
             print("Error: Could not fetch PWM")  # Debugging
             return jsonify({'error': 'Could not fetch PWM'}), 500
+        pfm = fetch_pfm_from_jaspar(tf_matrix_id)  
 
-        results = scan_dna_sequence(dna_sequence, pwm)
-        binding_sites = results["binding_sites"]
-        scores = results["scores"]
+        if pfm is None:
+            print("Error: Could not fetch PFM")  # Debugging
+            return jsonify({'error': 'Could not fetch PFM'}), 500
+
+        results = scan_dna_sequence(dna_sequence, pwm, pfm)
+        binding_sites = results.get("binding_sites", [])
+        scores = results.get("scores", [])
 
         # Generate interactive Plotly JSON data
         plot_data = generate_plotly_json(scores)
 
         # ✅ Pass PWM into highlight function
-        highlighted_sequence = highlight_binding_sites(dna_sequence, binding_sites, pwm)
+        highlighted_sequence = highlight_binding_sites(dna_sequence, binding_sites, pwm, pfm)
 
         return jsonify({
             'binding_sites': binding_sites,
@@ -65,9 +71,8 @@ def scan():
 
     except Exception as e:
         print("Unexpected error:", str(e))  # Debugging
+        traceback.print_exc()  # Print full traceback
         return jsonify({'error': 'Internal server error'}), 500
-
-
 
 def generate_plotly_json(scores):
     trace = go.Scatter(
@@ -139,35 +144,27 @@ def generate_plotly_json(scores):
 
 
 
-def highlight_binding_sites(sequence, binding_sites, pwm):
-    """
-    Highlights binding sites in a DNA sequence using the actual motif length.
-    
-    Args:
-        sequence (str): The input DNA sequence.
-        binding_sites (list): A list of binding site start positions.
-        pwm (dict): The PWM dictionary from JASPAR.
-
-    Returns:
-        str: The sequence with HTML span elements marking binding sites.
-    """
+def highlight_binding_sites(sequence, binding_sites, pwm, pfm):
     highlighted = list(sequence)
     
-    print(f"found binding sites: {binding_sites}")
-    if pwm is None or 'A' not in pwm:  # Check if PWM is valid
+    if pwm is None or 'A' not in pwm:
         print("Error: Invalid PWM data")
-        return sequence  # Return unmodified sequence
+        return sequence  
 
-    motif_length = len(pwm['A'])  # Get correct motif length dynamically
+    motif_length = len(pwm['A'])
 
     for i in binding_sites:
         if i + motif_length <= len(sequence):
-            for j in range(motif_length):
-                highlighted[i + j] = f"<span class='highlight'>{sequence[i + j]}</span>"
+            subseq = sequence[i:i + motif_length]
+
+            # Verify the sequence strictly follows the PFM motif
+            is_valid = all(pfm[base][j] > 0.05 for j, base in enumerate(subseq) if base in pfm)
+
+            if is_valid:
+                for j in range(motif_length):
+                    highlighted[i + j] = f"<span class='highlight'>{sequence[i + j]}</span>"
 
     return "".join(highlighted)
-
-
 
 
 if __name__ == '__main__':

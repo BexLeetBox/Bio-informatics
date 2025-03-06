@@ -1,5 +1,6 @@
 import requests
 import numpy as np
+import json
 JASPAR_API_URL = "https://jaspar.elixir.no/api/v1/matrix/"
 
 def fetch_pwm_from_jaspar(matrix_id):
@@ -31,4 +32,42 @@ def fetch_pwm_from_jaspar(matrix_id):
         return pwm
     else:
         print(f"Error fetching PWM for {matrix_id}: {response.status_code}")
+        return None
+
+
+def fetch_pfm_from_jaspar(tf_matrix_id):
+    """
+    Fetches the Position Frequency Matrix (PFM) from JASPAR for a given transcription factor matrix ID.
+    """
+    jaspar_url = f"https://jaspar.genereg.net/api/v1/matrix/{tf_matrix_id}/"
+
+    try:
+        response = requests.get(jaspar_url)
+        response.raise_for_status()  # Raise error for bad requests
+        
+        data = response.json()
+        print(f"Full response from JASPAR for {tf_matrix_id}: {json.dumps(data, indent=2)}")  # Debugging
+
+        if "pfm" not in data:
+            print("Error: PFM data not found in JASPAR response.")
+            return None
+
+        pfm_matrix = data["pfm"]
+
+        # Check if the matrix is in an expected dictionary format
+        if not isinstance(pfm_matrix, dict):
+            print(f"Unexpected PFM structure: {pfm_matrix}")
+            return None
+
+        pfm = {
+            'A': pfm_matrix.get('A', []),
+            'C': pfm_matrix.get('C', []),
+            'G': pfm_matrix.get('G', []),
+            'T': pfm_matrix.get('T', [])
+        }
+
+        return pfm
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching PFM from JASPAR: {e}")
         return None

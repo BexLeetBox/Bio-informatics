@@ -58,8 +58,15 @@ async function scanSequence() {
     let plotData = JSON.parse(result.plot_data);
     Plotly.newPlot("plotly-graph", plotData.data, plotData.layout);
 
-    // Show raw JSON output for debugging
-    document.getElementById("scan_output").innerText = JSON.stringify(result, null, 2);
+    // Show raw JSON output 
+    document.getElementById("scan_output").innerText = JSON.stringify(
+        Object.fromEntries(
+            Object.entries(result).filter(([key]) => !["highlighted_sequence", "plot_data"].includes(key))
+        ), 
+        null, 
+        2
+    );
+    
 }
 
 
